@@ -1,109 +1,168 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const CharacterCard = ({ name, image, route }: { name: string; image: string; route: string }) => {
+  const router = useRouter();
 
-export default function TabTwoScreen() {
+  const images: any = {
+    'fabius-bile': require('@/assets/images/fabius-bile.jpg'),
+    'abaddon': require('@/assets/images/abaddon.jpg'),
+    'typhus': require('@/assets/images/typhus.jpg'),
+    'daemon-prince': require('@/assets/images/daemon-prince.jpg'),
+    'tigurius': require('@/assets/images/tigurius.jpg'),
+    'roboute-guilliman': require('@/assets/images/roboute-guilliman.jpg'),
+    'marneus-calgar': require('@/assets/images/marneus-calgar.jpg'),
+    'uriel-ventris': require('@/assets/images/uriel-ventris.jpg'),
+    'placeholder': require('@/assets/images/placeholder.png'),
+  };
+
+  const imageSource = images[image] ? images[image] : { uri: image };
+
+  const handlePress = async () => {
+    await Haptics.selectionAsync();
+    if (route) {
+      router.push(route as any);
+    } else {
+      console.warn('No route specified for this card');
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <TouchableOpacity style={styles.card} onPress={handlePress}>
+      <Image source={imageSource} style={styles.characterImage} />
+      <Text style={styles.characterName}>{name}</Text>
+    </TouchableOpacity>
+  );
+};
+
+export default function CharacterScreen() {
+  return (
+    <ImageBackground
+      source={require('@/assets/images/background.jpeg')}
+      style={styles.background}
+      imageStyle={styles.backgroundImage}
+    >
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Characters</Text>
+        </View>
+
+        {/* Chaos Section */}
+        <View style={styles.sectionTitleContainer}>
+        <View style={[styles.sectionTitleBackground, styles.chaosBackground]} />
+        <Text style={styles.sectionTitleText}>CHAOS</Text>
+        </View>
+
+        <View style={styles.characterRow}>
+          <CharacterCard name="Fabius Bile" image="fabius-bile" route="/characters/fabius-bile" />
+          <CharacterCard name="Abaddon" image="abaddon" route="/characters/abaddon" />
+        </View>
+        <View style={styles.characterRow}>
+          <CharacterCard name="Typhus" image="typhus" route="/characters/typhus" />
+          <CharacterCard name="Daemon Prince" image="daemon-prince" route="/characters/daemon" />
+        </View>
+
+        {/* Space Marine Section */}
+        <View style={styles.sectionTitleContainer}>
+        <View style={[styles.sectionTitleBackground, styles.spaceMarineBackground]} />
+        <Text style={styles.sectionTitleText}>SPACEMARINE</Text>
+        </View>
+        
+        <View style={styles.characterRow}>
+          <CharacterCard name="Tigurius" image="tigurius" route="/characters/tigurius" />
+          <CharacterCard name="Roboute   Guilliman" image="roboute-guilliman" route="/characters/roboute" />
+        </View>
+        <View style={styles.characterRow}>
+          <CharacterCard name="Marneus Calgar" image="marneus-calgar" route="/characters/calgar" />
+          <CharacterCard name="Uriel Ventris" image="uriel-ventris" route="/characters/ventris" />
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  background: {
+    flex: 1,
   },
-  titleContainer: {
+  backgroundImage: {
+    resizeMode: 'repeat',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  header: {
+    marginTop: 60,
+    alignItems: 'center',
+  },
+  headerText: {
+    color: '#2d2d2d',
+    fontSize: 32,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  sectionTitleContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  sectionTitleBackground: {
+    position: 'absolute',
+    width: '100%',
+    height: 40,
+    backgroundColor: 'purple', // Default color for Chaos
+    transform: [{ skewX: '-20deg' }],
+    zIndex: -1,
+  },
+  sectionTitleText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    color: 'white',
+    letterSpacing: 2,
+    paddingVertical: 8,
+    zIndex: 1,
+  },
+  chaosBackground: {
+    backgroundColor: '#3B2731',
+  },
+  spaceMarineBackground: {
+    backgroundColor: '#070355',
+  },
+  characterRow: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-around',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  card: {
+    width: 140,
+    height: 200,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    paddingVertical: 8,
+  },
+  characterImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+  },
+  characterName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
