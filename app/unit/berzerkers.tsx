@@ -1,14 +1,20 @@
-import * as Haptics from 'expo-haptics';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 const FabiusBileCard = () => {
   const router = useRouter();
-
-  const handlePress = (route: '/(tabs)/settings') => {
+    const [isSaved, setIsSaved] = useState(false); // State to track favorite status
+  
+    const handlePress = (route: '/(tabs)/settings') => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Trigger haptic feedback
       router.push(route); // Navigate to the desired screen
+    };
+  
+    const toggleFavorite = () => {
+      setIsSaved(!isSaved); // Toggle favorite status
+      Haptics.selectionAsync(); // Provide feedback for toggling
     };
   
     return (
@@ -18,13 +24,18 @@ const FabiusBileCard = () => {
             style={styles.backButton}
             onPress={() => handlePress('/(tabs)/settings')}
           >
-          <Text style={styles.textBack}>Back</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Text style={styles.favoriteText}>Favorite</Text>
-        </TouchableOpacity>
-      </View>
+            <Text style={styles.textBack}>Back</Text>
+          </TouchableOpacity>
+  
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={toggleFavorite}
+          >
+            <Text style={styles.favoriteText}>
+              {isSaved ? 'Saved' : 'Save'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
       <View style={styles.imageContainer}>
         <Image
