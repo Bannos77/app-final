@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
 const AbaddonCard = () => {
   const router = useRouter();
+  const [isSaved, setIsSaved] = useState(false); // State to track favorite status
 
   const handlePress = (route: '/(tabs)/explore') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Trigger haptic feedback
     router.push(route); // Navigate to the desired screen
+  };
+
+  const toggleFavorite = () => {
+    setIsSaved(!isSaved); // Toggle favorite status
+    Haptics.selectionAsync(); // Provide feedback for toggling
   };
 
   return (
@@ -21,8 +27,13 @@ const AbaddonCard = () => {
           <Text style={styles.textBack}>Back</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Text style={styles.favoriteText}>Favorite</Text>
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={toggleFavorite}
+        >
+          <Text style={styles.favoriteText}>
+            {isSaved ? 'Saved' : 'Save'}
+          </Text>
         </TouchableOpacity>
       </View>
 
