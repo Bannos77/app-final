@@ -1,45 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
-const FabiusBileCard = () => {
+// Simulated API calls – replace with your real API functions
+const fetchFavouriteStatus = async (unitId: string): Promise<boolean> => {
+  // Example: GET /favourites/:unitId
+  return false; // Default
+};
+
+const updateFavouriteStatus = async (unitId: string, status: boolean): Promise<void> => {
+  // Example: POST /favourites/:unitId { status }
+};
+
+const TiguriusCard = () => {
   const router = useRouter();
-    const [isSaved, setIsSaved] = useState(false); // State to track favorite status
-  
-    const handlePress = (route: '/(tabs)/explore') => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Trigger haptic feedback
-      router.push(route); // Navigate to the desired screen
+  const [isSaved, setIsSaved] = useState(false);
+  const unitId = 'tigurius'; // Unique identifier for this card
+
+  const handlePress = (route: '/(tabs)/explore') => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (e) {
+      console.warn('Haptics not supported:', e);
+    }
+    router.push(route);
+  };
+
+  const toggleFavorite = async () => {
+    const newStatus = !isSaved;
+    setIsSaved(newStatus); // Optimistic UI update
+    try {
+      await updateFavouriteStatus(unitId, newStatus);
+      try {
+        Haptics.selectionAsync();
+      } catch (e) {
+        console.warn('Haptics not supported:', e);
+      }
+    } catch (error) {
+      console.error('Failed to update favourite:', error);
+      setIsSaved(!newStatus); // Revert on error
+    }
+  };
+
+  useEffect(() => {
+    const loadFavourite = async () => {
+      try {
+        const status = await fetchFavouriteStatus(unitId);
+        setIsSaved(status);
+      } catch (error) {
+        console.error('Failed to load favourite status:', error);
+      }
     };
-  
-    const toggleFavorite = () => {
-      setIsSaved(!isSaved); // Toggle favorite status
-      Haptics.selectionAsync(); // Provide feedback for toggling
-    };
-  
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => handlePress('/(tabs)/explore')}
-          >
-            <Text style={styles.textBack}>Back</Text>
-          </TouchableOpacity>
-  
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={toggleFavorite}
-          >
-            <Text style={styles.favoriteText}>
-              {isSaved ? 'Saved' : 'Save'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+    loadFavourite();
+  }, []);
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.buttonRow}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => handlePress('/(tabs)/explore')}
+        >
+          <Text style={styles.textBack}>Back</Text>
+        </TouchableOpacity>
+
+        {/* API-driven Favourite Button */}
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={toggleFavorite}
+        >
+          <Text style={styles.favoriteText}>
+            {isSaved ? '★ Favourite' : '☆ Favourite'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.imageContainer}>
         <Image
-          source={require('@/assets/images/tigurius.jpg')} // Local image file
+          source={require('@/assets/images/tigurius.jpg')}
           style={styles.image}
         />
       </View>
@@ -83,47 +123,42 @@ const FabiusBileCard = () => {
           {renderWeaponRow(['Melee', '5', '3+', '7', '-2', 'D3'])}
         </View>
         <Text style={styles.sectionExtra}>PSYCHIC</Text>
-
       </View>
     </ScrollView>
   );
 };
 
-const renderStatRow = (stats: string[], isHeader: boolean = false) => {
-  return (
-    <View style={[styles.statRow, isHeader ? styles.headerRow : null]}>
-      {stats.map((stat: string, index: number) => (
-        <Text
-          key={index}
-          style={[styles.statCell, isHeader ? styles.headerCell : null]}
-        >
-          {stat}
-        </Text>
-      ))}
-    </View>
-  );
-};
+const renderStatRow = (stats: string[], isHeader: boolean = false) => (
+  <View style={[styles.statRow, isHeader ? styles.headerRow : null]}>
+    {stats.map((stat, index) => (
+      <Text
+        key={index}
+        style={[styles.statCell, isHeader ? styles.headerCell : null]}
+      >
+        {stat}
+      </Text>
+    ))}
+  </View>
+);
 
-const renderWeaponRow = (stats: string[], isHeader: boolean = false) => {
-  return (
-    <View style={[styles.weaponRow, isHeader ? styles.headerRow : null]}>
-      {stats.map((stat, index) => (
-        <Text
-          key={index}
-          style={[styles.weaponCell, isHeader ? styles.headerCell : null]}
-        >
-          {stat}
-        </Text>
-      ))}
-    </View>
-  );
-};
+const renderWeaponRow = (stats: string[], isHeader: boolean = false) => (
+  <View style={[styles.weaponRow, isHeader ? styles.headerRow : null]}>
+    {stats.map((stat, index) => (
+      <Text
+        key={index}
+        style={[styles.weaponCell, isHeader ? styles.headerCell : null]}
+      >
+        {stat}
+      </Text>
+    ))}
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: '#4b4b4b', // Matches the grayish background
+    backgroundColor: '#4b4b4b',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -145,9 +180,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     borderRadius: 4,
   },
-  favoriteText: {
-    color: '#000',
-    fontWeight: 'bold',
+  favoriteText: { 
+    color: '#000', 
+    fontWeight: 'bold' 
   },
   imageContainer: {
     alignItems: 'center',
@@ -161,7 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   detailsContainer: {
-    backgroundColor: '#5a5a5a', // Dark gray background
+    backgroundColor: '#5a5a5a',
     borderRadius: 8,
     padding: 16,
   },
@@ -203,12 +238,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginVertical: 8,
-  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -218,17 +247,15 @@ const styles = StyleSheet.create({
   },
   sectionName: {
     fontSize: 14,
-    fontWeight: 'medium',
+    fontWeight: '500',
     color: '#fff',
     marginTop: 10,
-    marginBottom: 0,
   },
   sectionExtra: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#ff4d4d',
     marginTop: 5,
-    marginBottom: 0,
   },
   weaponTable: {
     marginVertical: 5,
@@ -249,4 +276,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FabiusBileCard;
+export default TiguriusCard;
